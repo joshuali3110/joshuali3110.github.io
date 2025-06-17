@@ -195,9 +195,9 @@ function App() {
       {/* Combined Home Section */}
       <section
         id="home"
-        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 pt-16 pb-24 relative"
+        className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 pt-16 pb-0 relative"
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Picture and Home Content */}
             <div className="text-center lg:text-left">
@@ -317,7 +317,7 @@ function App() {
             </div>
           </div>
           {/* Social Links - moved outside the grid for proper mobile flow */}
-          <div className="flex space-x-8 justify-center mt-12 lg:absolute lg:bottom-16 lg:left-1/2 lg:transform lg:-translate-x-1/2 lg:mt-0">
+          <div className="flex space-x-8 justify-center mt-12 lg:mt-16">
             <a
               href="mailto:joshuali3110@ucla.edu"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
@@ -341,7 +341,7 @@ function App() {
               <Linkedin size={32} />
             </a>
             <a
-              href="/public/Joshua_Li_resume.pdf"
+              href="/Joshua_Li_resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
