@@ -333,7 +333,7 @@ function App() {
               <Github size={32} />
             </a>
             <a
-              href="https://www.linkedin.com/in/joshua-li-1b9b892a8/"
+              href="https://www.linkedin.com/in/joshua-m-li/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
@@ -413,7 +413,7 @@ function App() {
                   popup.innerHTML = `
                   <div class="${
                     isDark ? "bg-gray-900 text-white" : "bg-white text-gray-900"
-                  } rounded-lg shadow-lg max-w-lg w-full p-6 relative border ${
+                  } rounded-lg shadow-lg max-w-lg w-full mx-4 p-6 relative border ${
                     isDark ? "border-gray-700" : "border-gray-200"
                   }">
                     <button class="absolute top-2 right-2 ${
@@ -468,11 +468,26 @@ function App() {
                     </div>
                   </div>
                   `;
+
+                  // Disable scrolling when popup opens
+                  document.body.style.overflow = "hidden";
+
                   document.body.appendChild(popup);
 
                   const closeButton = popup.querySelector("#close-popup");
-                  closeButton?.addEventListener("click", () => {
+                  const closePopup = () => {
                     document.body.removeChild(popup);
+                    // Re-enable scrolling when popup closes
+                    document.body.style.overflow = "";
+                  };
+
+                  closeButton?.addEventListener("click", closePopup);
+
+                  // Also close popup when clicking outside of it
+                  popup.addEventListener("click", (e) => {
+                    if (e.target === popup) {
+                      closePopup();
+                    }
                   });
                 }}
               >
