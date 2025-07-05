@@ -101,6 +101,32 @@ function App() {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
+  useEffect(() => {
+    let animationId: number;
+
+    const animate = () => {
+      if (!isDragging) {
+        // Apply small Y-axis rotation for idle spin
+        const idleRotation = quat.create();
+        quat.setAxisAngle(idleRotation, [0, 1, 0], 0.001); // Small Y-axis rotation
+        setOrientation((prev) => {
+          const next = quat.create();
+          quat.multiply(next, idleRotation, prev);
+          return next;
+        });
+      }
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  }, [isDragging]);
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
