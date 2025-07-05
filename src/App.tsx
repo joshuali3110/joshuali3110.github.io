@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Github,
   Linkedin,
@@ -12,11 +12,44 @@ import {
   Flashlight,
   FlashlightOff,
 } from "lucide-react";
+import { quat, mat4, vec3 } from "gl-matrix";
+import PythonLogo from "./assets/python.svg";
+import GoLogo from "./assets/go.svg";
+import GitLogo from "./assets/git.svg";
+import ReactLogo from "./assets/react.svg";
+import BashLogo from "./assets/gnubash.svg";
+import NumpyLogo from "./assets/numpy.svg";
+import LinuxLogo from "./assets/linux.svg";
+import CLogo from "./assets/c.svg";
+import CppLogo from "./assets/cpp.svg";
+import JavaScript from "./assets/javascript.svg";
+import MongoDB from "./assets/mongodb.svg";
+import Next from "./assets/nextjs.svg";
+import Node from "./assets/nodejs.svg";
+import PostgreSQL from "./assets/postgresql.svg";
+import PyTorch from "./assets/pytorch.svg";
+import R from "./assets/r.svg";
+import ScikitLearn from "./assets/scikitlearn.svg";
+import TypeScript from "./assets/typescript.svg";
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [darkMode, setDarkMode] = useState(false);
+
+  // Trackball rotation state
+  const [isDragging, setIsDragging] = useState(false);
+  const [lastMouse, setLastMouse] = useState<{ x: number; y: number } | null>(
+    null
+  );
+  const [orientation, setOrientation] = useState(() => quat.create());
+  const skillsContainerRef = useRef<HTMLDivElement>(null);
+  const [containerSize, setContainerSize] = useState(500); // px, default desktop
+
+  // Touch event state
+  const [lastTouch, setLastTouch] = useState<{ x: number; y: number } | null>(
+    null
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,6 +85,22 @@ function App() {
     }
   }, [darkMode]);
 
+  // Responsive container size
+  useEffect(() => {
+    function updateSize() {
+      if (skillsContainerRef.current) {
+        setContainerSize(skillsContainerRef.current.offsetWidth);
+      } else {
+        setContainerSize(
+          window.innerWidth < 640 ? window.innerWidth - 32 : 500
+        );
+      }
+    }
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -60,15 +109,25 @@ function App() {
     setIsMenuOpen(false);
   };
 
-  const skills = [
-    { name: "DSA", level: 85 },
-    { name: "Python", level: 75 },
-    { name: "C/C++", level: 60 },
-    { name: "Go", level: 60 },
-    { name: "Git", level: 60 },
-    { name: "Web Development", level: 55 },
-    { name: "PyTorch", level: 50 },
-    { name: "Machine Learning", level: 40 },
+  const technologies = [
+    { name: "Python", icon: PythonLogo, level: 95 },
+    { name: "C", icon: CLogo, level: 80 },
+    { name: "C++", icon: CppLogo, level: 85 },
+    { name: "JavaScript", icon: JavaScript, level: 60 },
+    { name: "TypeScript", icon: TypeScript, level: 60 },
+    { name: "Go", icon: GoLogo, level: 85 },
+    { name: "Git", icon: GitLogo, level: 90 },
+    { name: "React", icon: ReactLogo, level: 65 },
+    { name: "Next.js", icon: Next, level: 60 },
+    { name: "Node.js", icon: Node, level: 60 },
+    { name: "Bash", icon: BashLogo, level: 85 },
+    { name: "MongoDB", icon: MongoDB, level: 60 },
+    { name: "PostgreSQL", icon: PostgreSQL, level: 60 },
+    { name: "NumPy", icon: NumpyLogo, level: 80 },
+    { name: "PyTorch", icon: PyTorch, level: 75 },
+    { name: "Scikit-learn", icon: ScikitLearn, level: 60 },
+    { name: "Linux", icon: LinuxLogo, level: 80 },
+    { name: "R", icon: R, level: 75 },
   ];
 
   const projects = [
@@ -113,6 +172,110 @@ function App() {
         "https://drive.google.com/file/d/1BSxMrwpGKUn_VdXIERGbzOOupFtLvEA1/view?usp=sharing",
     },
   ];
+
+  // Trackball drag handlers
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    setLastMouse({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !lastMouse) return;
+    if (!skillsContainerRef.current) return;
+    const rect = skillsContainerRef.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    // Normalize mouse positions to [-1, 1]
+    const getTrackballVec = (x: number, y: number) => {
+      const nx = (2 * (x - rect.left)) / width - 1;
+      const ny = (2 * (y - rect.top)) / height - 1;
+      const nz2 = 1 - nx * nx - ny * ny;
+      const nz = nz2 > 0 ? Math.sqrt(nz2) : 0;
+      return vec3.fromValues(nx, ny, nz);
+    };
+    const v1 = getTrackballVec(lastMouse.x, lastMouse.y);
+    const v2 = getTrackballVec(e.clientX, e.clientY);
+    // Axis of rotation
+    const axis = vec3.create();
+    vec3.cross(axis, v1, v2);
+    if (vec3.length(axis) < 1e-6) return; // No movement
+    vec3.normalize(axis, axis);
+    // Angle
+    let angle = Math.acos(Math.min(1, vec3.dot(v1, v2)));
+    // Sensitivity
+    angle *= 1.5;
+    // Create quaternion for this drag
+    const deltaQuat = quat.create();
+    quat.setAxisAngle(deltaQuat, axis, angle);
+    // Apply to current orientation
+    setOrientation((prev) => {
+      const next = quat.create();
+      quat.multiply(next, deltaQuat, prev);
+      return next;
+    });
+    setLastMouse({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setLastMouse(null);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    setLastMouse(null);
+  };
+
+  // Convert orientation quaternion to CSS matrix3d
+  const getCSSMatrix = () => {
+    const m = mat4.create();
+    mat4.fromQuat(m, orientation);
+    // CSS matrix3d is column-major, mat4 is column-major, so direct mapping
+    return `matrix3d(${Array.from(m).join(",")})`;
+  };
+
+  // Touch handlers
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      setLastTouch({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    }
+  };
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isDragging || !lastTouch) return;
+    if (!skillsContainerRef.current) return;
+    const touch = e.touches[0];
+    const rect = skillsContainerRef.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const getTrackballVec = (x: number, y: number) => {
+      const nx = (2 * (x - rect.left)) / width - 1;
+      const ny = (2 * (y - rect.top)) / height - 1;
+      const nz2 = 1 - nx * nx - ny * ny;
+      const nz = nz2 > 0 ? Math.sqrt(nz2) : 0;
+      return vec3.fromValues(nx, ny, nz);
+    };
+    const v1 = getTrackballVec(lastTouch.x, lastTouch.y);
+    const v2 = getTrackballVec(touch.clientX, touch.clientY);
+    const axis = vec3.create();
+    vec3.cross(axis, v1, v2);
+    if (vec3.length(axis) < 1e-6) return;
+    vec3.normalize(axis, axis);
+    let angle = Math.acos(Math.min(1, vec3.dot(v1, v2)));
+    angle *= 1.5;
+    const deltaQuat = quat.create();
+    quat.setAxisAngle(deltaQuat, axis, angle);
+    setOrientation((prev) => {
+      const next = quat.create();
+      quat.multiply(next, deltaQuat, prev);
+      return next;
+    });
+    setLastTouch({ x: touch.clientX, y: touch.clientY });
+  };
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    setLastTouch(null);
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -357,32 +520,99 @@ function App() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Technical Skills
+              Technologies I've Used
             </h2>
             <div className="w-20 h-1 bg-blue-600 dark:bg-blue-400 mx-auto"></div>
           </div>
-          <div className="grid md:grid-cols-2 gap-8">
-            {skills.map((skill, index) => (
-              <div
-                key={skill.name}
-                className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-gray-700"
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {skill.name}
-                  </h3>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {skill.level}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+          {/* 3D Technology Logo Cloud */}
+          <div
+            ref={skillsContainerRef}
+            className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] flex items-center justify-center cursor-grab active:cursor-grabbing"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            style={{
+              perspective: "1000px",
+              userSelect: "none",
+              touchAction: "none",
+            }}
+          >
+            {/* Blue dot center indicator (not rotated) */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-4 h-4 bg-blue-600 dark:bg-blue-400 rounded-full opacity-50 animate-pulse"></div>
+            </div>
+            <div
+              className="relative w-full h-full flex items-center justify-center transition-transform duration-300 ease-out"
+              style={{
+                transform: getCSSMatrix(),
+                transformStyle: "preserve-3d",
+              }}
+            >
+              {technologies.map((tech, index) => {
+                const IconComponent = tech.icon;
+                // Fibonacci sphere algorithm
+                const N = technologies.length;
+                const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+                const y = 1 - (2 * index) / (N - 1);
+                const radius = Math.sqrt(1 - y * y);
+                const theta = goldenAngle * index;
+                const x = Math.cos(theta) * radius;
+                const z = Math.sin(theta) * radius;
+                // Responsive sphere radius
+                const sphereRadius =
+                  containerSize >= 640
+                    ? 200
+                    : Math.max(0.35 * containerSize, 80);
+                // Billboard: use inverse of orientation
+                const inv = quat.create();
+                quat.invert(inv, orientation);
+                const m = mat4.create();
+                mat4.fromQuat(m, inv);
+                const cssBillboard = `matrix3d(${Array.from(m).join(",")})`;
+                // Responsive icon size
+                const iconSize = containerSize < 400 ? "w-8 h-8" : "w-14 h-14";
+                const boxSize = containerSize < 400 ? "w-14 h-14" : "w-20 h-20";
+                return (
                   <div
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 h-2 rounded-full transition-all duration-1000 ease-out"
-                    style={{ width: `${skill.level}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
+                    key={tech.name}
+                    className="absolute flex flex-col items-center justify-center group"
+                    style={{
+                      transform: `translate3d(${x * sphereRadius}px, ${
+                        y * sphereRadius
+                      }px, ${z * sphereRadius}px) ${cssBillboard}`,
+                      transition: "transform 0.3s ease-out",
+                    }}
+                  >
+                    <div className="relative">
+                      <div
+                        className={`bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-gray-800 dark:to-gray-700 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${boxSize}`}
+                      >
+                        <img
+                          src={IconComponent}
+                          alt={tech.name}
+                          className={`object-contain transition-colors duration-300 ${iconSize} dark:filter dark:invert dark:brightness-200`}
+                          draggable={false}
+                        />
+                      </div>
+                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-2 py-1 rounded text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                        {tech.name}
+                      </div>
+                    </div>
+                    {/* Skill level indicator */}
+                    <div className="mt-2 w-12 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 transition-all duration-1000 ease-out"
+                        style={{ width: `${tech.level}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
