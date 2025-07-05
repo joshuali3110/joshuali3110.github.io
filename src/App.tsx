@@ -277,6 +277,13 @@ function App() {
     setLastTouch(null);
   };
 
+  // Calculate cssBillboard for use by both the blue dot and icons
+  const inv = quat.create();
+  quat.invert(inv, orientation);
+  const m = mat4.create();
+  mat4.fromQuat(m, inv);
+  const cssBillboard = `matrix3d(${Array.from(m).join(",")})`;
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Navigation */}
@@ -541,10 +548,6 @@ function App() {
               touchAction: "none",
             }}
           >
-            {/* Blue dot center indicator (not rotated) */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-4 h-4 bg-blue-600 dark:bg-blue-400 rounded-full opacity-50 animate-pulse"></div>
-            </div>
             <div
               className="relative w-full h-full flex items-center justify-center transition-transform duration-300 ease-out"
               style={{
@@ -552,6 +555,15 @@ function App() {
                 transformStyle: "preserve-3d",
               }}
             >
+              {/* Blue dot at center of sphere */}
+              <div
+                className="absolute flex items-center justify-center pointer-events-none"
+                style={{
+                  transform: `translate3d(0px, 0px, 0px) ${cssBillboard}`,
+                }}
+              >
+                <div className="w-4 h-4 bg-blue-600 dark:bg-blue-400 rounded-full opacity-50 animate-pulse"></div>
+              </div>
               {technologies.map((tech, index) => {
                 const IconComponent = tech.icon;
                 // Fibonacci sphere algorithm
