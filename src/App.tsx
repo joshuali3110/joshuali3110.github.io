@@ -50,22 +50,6 @@ function App() {
   const [lastTouch, setLastTouch] = useState<{ x: number; y: number } | null>(
     null
   );
-  const [lastTouchTime, setLastTouchTime] = useState(0);
-
-  // Refs for latest state values
-  const isDraggingRef = useRef(isDragging);
-  const lastTouchRef = useRef(lastTouch);
-  const lastTouchTimeRef = useRef(lastTouchTime);
-
-  useEffect(() => {
-    isDraggingRef.current = isDragging;
-  }, [isDragging]);
-  useEffect(() => {
-    lastTouchRef.current = lastTouch;
-  }, [lastTouch]);
-  useEffect(() => {
-    lastTouchTimeRef.current = lastTouchTime;
-  }, [lastTouchTime]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -124,7 +108,7 @@ function App() {
       if (!isDragging) {
         // Apply small Y-axis rotation for idle spin
         const idleRotation = quat.create();
-        quat.setAxisAngle(idleRotation, [0, 1, 0], 0.002); // Small Y-axis rotation
+        quat.setAxisAngle(idleRotation, [0, 1, 0], 0.001); // Small Y-axis rotation
         setOrientation((prev) => {
           const next = quat.create();
           quat.multiply(next, idleRotation, prev);
@@ -276,22 +260,16 @@ function App() {
     return `matrix3d(${Array.from(m).join(",")})`;
   };
 
-  // Touch handlers using refs
-  const handleTouchStart = (e: TouchEvent) => {
+  // Touch handlers
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (e.touches.length === 1) {
-      e.preventDefault(); // Prevent default scrolling
       setIsDragging(true);
       setLastTouch({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-      setLastTouchTime(Date.now());
     }
   };
-  const handleTouchMove = (e: TouchEvent) => {
-    if (!isDraggingRef.current || !lastTouchRef.current) return;
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isDragging || !lastTouch) return;
     if (!skillsContainerRef.current) return;
-    e.preventDefault(); // Prevent default scrolling
-    const now = Date.now();
-    if (now - lastTouchTimeRef.current < 16) return; // ~60fps max
-    setLastTouchTime(now);
     const touch = e.touches[0];
     const rect = skillsContainerRef.current.getBoundingClientRect();
     const width = rect.width;
@@ -303,14 +281,14 @@ function App() {
       const nz = nz2 > 0 ? Math.sqrt(nz2) : 0;
       return vec3.fromValues(nx, ny, nz);
     };
-    const v1 = getTrackballVec(lastTouchRef.current.x, lastTouchRef.current.y);
+    const v1 = getTrackballVec(lastTouch.x, lastTouch.y);
     const v2 = getTrackballVec(touch.clientX, touch.clientY);
     const axis = vec3.create();
     vec3.cross(axis, v1, v2);
     if (vec3.length(axis) < 1e-6) return;
     vec3.normalize(axis, axis);
     let angle = Math.acos(Math.min(1, vec3.dot(v1, v2)));
-    angle *= 0.8;
+    angle *= 1.5;
     const deltaQuat = quat.create();
     quat.setAxisAngle(deltaQuat, axis, angle);
     setOrientation((prev) => {
@@ -320,30 +298,12 @@ function App() {
     });
     setLastTouch({ x: touch.clientX, y: touch.clientY });
   };
-  const handleTouchEnd = (e: TouchEvent) => {
-    e.preventDefault(); // Prevent default behavior
+  const handleTouchEnd = () => {
     setIsDragging(false);
     setLastTouch(null);
   };
 
-  // Add useEffect to attach native event listeners with passive: false
-  useEffect(() => {
-    const container = skillsContainerRef.current;
-    if (!container) return;
-    const handleStart = (e: TouchEvent) => handleTouchStart(e);
-    const handleMove = (e: TouchEvent) => handleTouchMove(e);
-    const handleEnd = (e: TouchEvent) => handleTouchEnd(e);
-    container.addEventListener("touchstart", handleStart, { passive: false });
-    container.addEventListener("touchmove", handleMove, { passive: false });
-    container.addEventListener("touchend", handleEnd, { passive: false });
-    return () => {
-      container.removeEventListener("touchstart", handleStart);
-      container.removeEventListener("touchmove", handleMove);
-      container.removeEventListener("touchend", handleEnd);
-    };
-  }, []);
-
-  // Calculate cssBillboard once and reuse for all icons
+  // Calculate cssBillboard for use by both the blue dot and icons
   const inv = quat.create();
   quat.invert(inv, orientation);
   const m = mat4.create();
@@ -605,12 +565,13 @@ function App() {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             style={{
               perspective: "1000px",
               userSelect: "none",
               touchAction: "none",
-              WebkitUserSelect: "none",
-              WebkitTouchCallout: "none",
             }}
           >
             <div
@@ -618,8 +579,6 @@ function App() {
               style={{
                 transform: getCSSMatrix(),
                 transformStyle: "preserve-3d",
-                willChange: "transform",
-                backfaceVisibility: "hidden",
               }}
             >
               {/* Blue dot at center of sphere */}
@@ -646,6 +605,12 @@ function App() {
                   containerSize >= 640
                     ? 200
                     : Math.max(0.35 * containerSize, 80);
+                // Billboard: use inverse of orientation
+                const inv = quat.create();
+                quat.invert(inv, orientation);
+                const m = mat4.create();
+                mat4.fromQuat(m, inv);
+                const cssBillboard = `matrix3d(${Array.from(m).join(",")})`;
                 // Responsive icon size
                 const iconSize = containerSize < 400 ? "w-8 h-8" : "w-14 h-14";
                 const boxSize = containerSize < 400 ? "w-14 h-14" : "w-20 h-20";
@@ -658,8 +623,6 @@ function App() {
                         y * sphereRadius
                       }px, ${z * sphereRadius}px) ${cssBillboard}`,
                       transition: "transform 0.3s ease-out",
-                      willChange: "transform",
-                      backfaceVisibility: "hidden",
                     }}
                   >
                     <div className="relative">
