@@ -560,7 +560,7 @@ function App() {
           {/* 3D Technology Logo Cloud */}
           <div
             ref={skillsContainerRef}
-            className="relative w-[min(90vw,500px)] aspect-square mx-auto flex items-center justify-center cursor-grab active:cursor-grabbing border-2 border-dotted border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden p-4"
+            className="relative w-[min(90vw,650px)] aspect-square mx-auto flex items-center justify-center cursor-grab active:cursor-grabbing border-2 border-dotted border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden p-4"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -604,7 +604,7 @@ function App() {
                 const sphereRadius =
                   containerSize >= 640
                     ? 200
-                    : Math.max(0.35 * containerSize, 80);
+                    : Math.max(0.34 * containerSize, 80);
                 // Billboard: use inverse of orientation
                 const inv = quat.create();
                 quat.invert(inv, orientation);
