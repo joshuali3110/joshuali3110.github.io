@@ -50,7 +50,6 @@ function App() {
   const [lastTouch, setLastTouch] = useState<{ x: number; y: number } | null>(
     null
   );
-  const [lastTouchTime, setLastTouchTime] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -268,21 +267,13 @@ function App() {
       setLastTouch({ x: e.touches[0].clientX, y: e.touches[0].clientY });
     }
   };
-
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!isDragging || !lastTouch) return;
     if (!skillsContainerRef.current) return;
-
-    // Throttle touch events to improve performance on mobile devices
-    const now = Date.now();
-    if (now - lastTouchTime < 16) return; // ~60fps throttling
-    setLastTouchTime(now);
-
     const touch = e.touches[0];
     const rect = skillsContainerRef.current.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
-
     const getTrackballVec = (x: number, y: number) => {
       const nx = (2 * (x - rect.left)) / width - 1;
       const ny = (2 * (y - rect.top)) / height - 1;
@@ -290,7 +281,6 @@ function App() {
       const nz = nz2 > 0 ? Math.sqrt(nz2) : 0;
       return vec3.fromValues(nx, ny, nz);
     };
-
     const v1 = getTrackballVec(lastTouch.x, lastTouch.y);
     const v2 = getTrackballVec(touch.clientX, touch.clientY);
     const axis = vec3.create();
@@ -308,25 +298,17 @@ function App() {
     });
     setLastTouch({ x: touch.clientX, y: touch.clientY });
   };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    setIsDragging(false);
-    setLastTouch(null);
-  };
-
-  const handleTouchCancel = (e: React.TouchEvent<HTMLDivElement>) => {
+  const handleTouchEnd = () => {
     setIsDragging(false);
     setLastTouch(null);
   };
 
   // Calculate cssBillboard for use by both the blue dot and icons
-  const getBillboardMatrix = () => {
-    const inv = quat.create();
-    quat.invert(inv, orientation);
-    const m = mat4.create();
-    mat4.fromQuat(m, inv);
-    return `matrix3d(${Array.from(m).join(",")})`;
-  };
+  const inv = quat.create();
+  quat.invert(inv, orientation);
+  const m = mat4.create();
+  mat4.fromQuat(m, inv);
+  const cssBillboard = `matrix3d(${Array.from(m).join(",")})`;
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -586,16 +568,10 @@ function App() {
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            onTouchCancel={handleTouchCancel}
             style={{
               perspective: "1000px",
               userSelect: "none",
               touchAction: "none",
-              WebkitTouchCallout: "none",
-              WebkitUserSelect: "none",
-              KhtmlUserSelect: "none",
-              MozUserSelect: "none",
-              msUserSelect: "none",
             }}
           >
             <div
@@ -603,14 +579,13 @@ function App() {
               style={{
                 transform: getCSSMatrix(),
                 transformStyle: "preserve-3d",
-                willChange: "transform",
               }}
             >
               {/* Blue dot at center of sphere */}
               <div
                 className="absolute flex items-center justify-center pointer-events-none"
                 style={{
-                  transform: `translate3d(0px, 0px, 0px) ${getBillboardMatrix()}`,
+                  transform: `translate3d(0px, 0px, 0px) ${cssBillboard}`,
                 }}
               >
                 <div className="w-4 h-4 bg-blue-600 dark:bg-blue-400 rounded-full opacity-50 animate-pulse"></div>
@@ -631,7 +606,11 @@ function App() {
                     ? 200
                     : Math.max(0.35 * containerSize, 80);
                 // Billboard: use inverse of orientation
-                const cssBillboard = getBillboardMatrix();
+                const inv = quat.create();
+                quat.invert(inv, orientation);
+                const m = mat4.create();
+                mat4.fromQuat(m, inv);
+                const cssBillboard = `matrix3d(${Array.from(m).join(",")})`;
                 // Responsive icon size
                 const iconSize = containerSize < 400 ? "w-8 h-8" : "w-14 h-14";
                 const boxSize = containerSize < 400 ? "w-14 h-14" : "w-20 h-20";
@@ -644,7 +623,6 @@ function App() {
                         y * sphereRadius
                       }px, ${z * sphereRadius}px) ${cssBillboard}`,
                       transition: "transform 0.3s ease-out",
-                      willChange: "transform",
                     }}
                   >
                     <div className="relative">
