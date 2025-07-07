@@ -108,7 +108,7 @@ function App() {
       if (!isDragging) {
         // Apply small Y-axis rotation for idle spin
         const idleRotation = quat.create();
-        quat.setAxisAngle(idleRotation, [0, 1, 0], 0.001); // Small Y-axis rotation
+        quat.setAxisAngle(idleRotation, [0, 1, 0], 0.002); // Small Y-axis rotation
         setOrientation((prev) => {
           const next = quat.create();
           quat.multiply(next, idleRotation, prev);
@@ -560,7 +560,7 @@ function App() {
           {/* 3D Technology Logo Cloud */}
           <div
             ref={skillsContainerRef}
-            className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] flex items-center justify-center cursor-grab active:cursor-grabbing"
+            className="relative w-[min(90vw,500px)] aspect-square mx-auto flex items-center justify-center cursor-grab active:cursor-grabbing border-2 border-dotted border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden p-4"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
