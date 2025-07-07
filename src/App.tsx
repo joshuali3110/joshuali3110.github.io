@@ -57,6 +57,16 @@ function App() {
   const lastTouchRef = useRef(lastTouch);
   const lastTouchTimeRef = useRef(lastTouchTime);
 
+  // State for hovered/tapped technology
+  const [hoveredTech, setHoveredTech] = useState<string | null>(null);
+  // Ref for mobile tap timeout
+  const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // State to force pointer events reset after drag
+  const [pointerEventsReset, setPointerEventsReset] = useState(false);
+
+  // Refs for icon DOM nodes
+  const iconRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   useEffect(() => {
     isDraggingRef.current = isDragging;
   }, [isDragging]);
@@ -117,9 +127,9 @@ function App() {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
+  // Restore idle rotation effect
   useEffect(() => {
     let animationId: number;
-
     const animate = () => {
       if (!isDragging) {
         // Apply small Y-axis rotation for idle spin
@@ -133,9 +143,7 @@ function App() {
       }
       animationId = requestAnimationFrame(animate);
     };
-
     animate();
-
     return () => {
       if (animationId) {
         cancelAnimationFrame(animationId);
@@ -261,11 +269,17 @@ function App() {
   const handleMouseUp = () => {
     setIsDragging(false);
     setLastMouse(null);
+    // Force pointer events reset
+    setPointerEventsReset(true);
+    setTimeout(() => setPointerEventsReset(false), 50);
   };
 
   const handleMouseLeave = () => {
     setIsDragging(false);
     setLastMouse(null);
+    // Force pointer events reset
+    setPointerEventsReset(true);
+    setTimeout(() => setPointerEventsReset(false), 50);
   };
 
   // Convert orientation quaternion to CSS matrix3d
@@ -324,6 +338,9 @@ function App() {
     e.preventDefault(); // Prevent default behavior
     setIsDragging(false);
     setLastTouch(null);
+    // Force pointer events reset
+    setPointerEventsReset(true);
+    setTimeout(() => setPointerEventsReset(false), 50);
   };
 
   // Add useEffect to attach native event listeners with passive: false
@@ -349,6 +366,85 @@ function App() {
   const m = mat4.create();
   mat4.fromQuat(m, inv);
   const cssBillboard = `matrix3d(${Array.from(m).join(",")})`;
+
+  // Debug log for hoveredTech
+  //console.log("hoveredTech:", hoveredTech);
+
+  // Utility to detect touch device
+  const isTouchDevice = () => {
+    return (
+      typeof window !== "undefined" &&
+      ("ontouchstart" in window || navigator.maxTouchPoints > 0)
+    );
+  };
+
+  // Project 3D icon position to 2D container coordinates
+  function projectTo2D(
+    x: number,
+    y: number,
+    z: number,
+    radius: number,
+    containerRect: DOMRect
+  ) {
+    // Perspective projection
+    const perspective = 1000;
+    const viewerZ = perspective;
+    const scale = viewerZ / (viewerZ - z * radius);
+    const px = x * radius * scale + containerRect.width / 2;
+    const py = y * radius * scale + containerRect.height / 2;
+    return { x: px, y: py };
+  }
+
+  // Handler for pointer events on the skills container using DOM hit-testing
+  const handlePointerEvent = (
+    e: React.PointerEvent<HTMLDivElement>,
+    eventType: "down" | "up" | "move" | "leave"
+  ) => {
+    if (!skillsContainerRef.current) return;
+    const pointerX = e.clientX;
+    const pointerY = e.clientY;
+    let foundTech: string | null = null;
+    for (let i = 0; i < technologies.length; ++i) {
+      const ref = iconRefs.current[i];
+      if (!ref) continue;
+      const rect = ref.getBoundingClientRect();
+      if (
+        pointerX >= rect.left &&
+        pointerX <= rect.right &&
+        pointerY >= rect.top &&
+        pointerY <= rect.bottom
+      ) {
+        foundTech = technologies[i].name;
+        break;
+      }
+    }
+    if (eventType === "down") {
+      if (foundTech) {
+        setHoveredTech(foundTech);
+        if (isTouchDevice() && e.pointerType === "touch") {
+          if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+          tapTimeoutRef.current = setTimeout(() => {
+            setHoveredTech((prev) => (prev === foundTech ? null : prev));
+          }, 1000);
+        }
+      } else {
+        setHoveredTech(null);
+      }
+    } else if (eventType === "up") {
+      if (!isTouchDevice()) {
+        setTimeout(
+          () => setHoveredTech((prev) => (prev === foundTech ? null : prev)),
+          200
+        );
+      }
+    } else if (eventType === "move") {
+      if (!isTouchDevice()) {
+        setHoveredTech(foundTech);
+      }
+    } else if (eventType === "leave") {
+      setHoveredTech(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -612,6 +708,10 @@ function App() {
               WebkitUserSelect: "none",
               WebkitTouchCallout: "none",
             }}
+            onPointerDown={(e) => handlePointerEvent(e, "down")}
+            onPointerUp={(e) => handlePointerEvent(e, "up")}
+            onPointerMove={(e) => handlePointerEvent(e, "move")}
+            onPointerLeave={(e) => handlePointerEvent(e, "leave")}
           >
             <div
               className="relative w-full h-full flex items-center justify-center transition-transform duration-300 ease-out"
@@ -649,22 +749,26 @@ function App() {
                 // Responsive icon size
                 const iconSize = containerSize < 400 ? "w-8 h-8" : "w-14 h-14";
                 const boxSize = containerSize < 400 ? "w-14 h-14" : "w-20 h-20";
+                // Determine if this icon is hovered/tapped
+                const isActive = hoveredTech === tech.name;
                 return (
                   <div
                     key={tech.name}
+                    ref={(el) => (iconRefs.current[index] = el)}
                     className="absolute flex flex-col items-center justify-center group"
                     style={{
                       transform: `translate3d(${x * sphereRadius}px, ${
                         y * sphereRadius
                       }px, ${z * sphereRadius}px) ${cssBillboard}`,
                       transition: "transform 0.3s ease-out",
-                      willChange: "transform",
-                      backfaceVisibility: "hidden",
+                      pointerEvents: "none", // icons themselves no longer handle pointer events
                     }}
                   >
                     <div className="relative">
                       <div
-                        className={`bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-gray-800 dark:to-gray-700 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${boxSize}`}
+                        className={`bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-gray-800 dark:to-gray-700 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 ${boxSize} ${
+                          isActive ? "scale-110 rotate-12" : ""
+                        }`}
                       >
                         <img
                           src={IconComponent}
@@ -673,7 +777,11 @@ function App() {
                           draggable={false}
                         />
                       </div>
-                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-2 py-1 rounded text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                      <div
+                        className={`absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-2 py-1 rounded text-xs font-medium transition-opacity duration-300 whitespace-nowrap ${
+                          isActive ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
                         {tech.name}
                       </div>
                     </div>
