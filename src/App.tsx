@@ -42,9 +42,13 @@ function App() {
   const [lastMouse, setLastMouse] = useState<{ x: number; y: number } | null>(
     null
   );
+  const orientationRef = useRef(quat.create());
   const [orientation, setOrientation] = useState(() => quat.create());
   const skillsContainerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState(500); // px, default desktop
+  const animationRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number>(0);
+  const isTabVisibleRef = useRef<boolean>(true);
 
   // Touch event state
   const [lastTouch, setLastTouch] = useState<{ x: number; y: number } | null>(
@@ -102,28 +106,55 @@ function App() {
   }, []);
 
   useEffect(() => {
-    let animationId: number;
+    let frameCount = 0;
 
-    const animate = () => {
-      if (!isDragging) {
+    const animate = (currentTime: number) => {
+      if (!isDragging && isTabVisibleRef.current) {
+        // Calculate delta time for consistent rotation speed
+        const deltaTime = currentTime - lastTimeRef.current;
+        const rotationSpeed = 0.0005; // radians per millisecond
+        const angle = rotationSpeed * deltaTime;
+
         // Apply small Y-axis rotation for idle spin
         const idleRotation = quat.create();
-        quat.setAxisAngle(idleRotation, [0, 1, 0], 0.002); // Small Y-axis rotation
-        setOrientation((prev) => {
-          const next = quat.create();
-          quat.multiply(next, idleRotation, prev);
-          return next;
-        });
+        quat.setAxisAngle(idleRotation, [0, 1, 0], angle);
+
+        // Update the ref directly without triggering React re-renders
+        const next = quat.create();
+        quat.multiply(next, idleRotation, orientationRef.current);
+        quat.copy(orientationRef.current, next);
+
+        // Update React state every 6 frames (10 FPS) to reduce re-renders
+        frameCount++;
+        if (frameCount % 6 === 0) {
+          setOrientation(next);
+        }
       }
-      animationId = requestAnimationFrame(animate);
+
+      lastTimeRef.current = currentTime;
+      animationRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    // Handle visibility change
+    const handleVisibilityChange = () => {
+      isTabVisibleRef.current = !document.hidden;
+      if (!document.hidden) {
+        // Reset the last time when tab becomes visible to prevent large jumps
+        lastTimeRef.current = performance.now();
+      }
+    };
+
+    // Start animation
+    animationRef.current = requestAnimationFrame(animate);
+
+    // Add visibility change listener
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
       }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [isDragging]);
 
@@ -237,6 +268,7 @@ function App() {
     setOrientation((prev) => {
       const next = quat.create();
       quat.multiply(next, deltaQuat, prev);
+      quat.copy(orientationRef.current, next);
       return next;
     });
     setLastMouse({ x: e.clientX, y: e.clientY });
@@ -294,6 +326,7 @@ function App() {
     setOrientation((prev) => {
       const next = quat.create();
       quat.multiply(next, deltaQuat, prev);
+      quat.copy(orientationRef.current, next);
       return next;
     });
     setLastTouch({ x: touch.clientX, y: touch.clientY });
