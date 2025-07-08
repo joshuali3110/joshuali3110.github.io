@@ -593,7 +593,7 @@ function App() {
           {/* 3D Technology Logo Cloud */}
           <div
             ref={skillsContainerRef}
-            className="relative w-[min(90vw,650px)] aspect-square mx-auto flex items-center justify-center cursor-grab active:cursor-grabbing rounded-lg overflow-hidden p-4"
+            className="relative w-[min(90vw,580px)] aspect-square mx-auto flex items-center justify-center cursor-grab active:cursor-grabbing rounded-lg overflow-hidden p-4"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
