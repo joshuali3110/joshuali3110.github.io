@@ -11,6 +11,8 @@ import {
   X,
   Flashlight,
   FlashlightOff,
+  Check,
+  Copy,
 } from "lucide-react";
 import { quat, mat4, vec3 } from "gl-matrix";
 import PythonLogo from "./assets/python.svg";
@@ -36,6 +38,7 @@ function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [darkMode, setDarkMode] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
 
   // Trackball rotation state
   const [isDragging, setIsDragging] = useState(false);
@@ -164,6 +167,25 @@ function App() {
       element.scrollIntoView({ behavior: "smooth" });
     }
     setIsMenuOpen(false);
+  };
+
+  const copyEmailToClipboard = async () => {
+    const email = "joshuali3110@ucla.edu";
+    try {
+      await navigator.clipboard.writeText(email);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = email;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    }
   };
 
   const technologies = [
@@ -547,12 +569,36 @@ function App() {
           </div>
           {/* Social Links - moved outside the grid for proper mobile flow */}
           <div className="flex space-x-8 justify-center mt-12 lg:mt-16">
-            <a
-              href="mailto:joshuali3110@ucla.edu"
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+            <button
+              onClick={copyEmailToClipboard}
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors relative group"
+              title="joshuali3110 [at] ucla [dot] edu"
             >
-              <Mail size={32} />
-            </a>
+              <div className="relative">
+                <Mail
+                  size={32}
+                  className={`transition-opacity duration-300 ${
+                    emailCopied
+                      ? "opacity-0"
+                      : "opacity-100 group-hover:opacity-0"
+                  }`}
+                />
+                <Copy
+                  size={32}
+                  className={`absolute inset-0 transition-opacity duration-300 ${
+                    emailCopied
+                      ? "opacity-0"
+                      : "opacity-0 group-hover:opacity-100"
+                  }`}
+                />
+                <Check
+                  size={32}
+                  className={`absolute inset-0 transition-opacity duration-300 ${
+                    emailCopied ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              </div>
+            </button>
             <a
               href="https://github.com/joshuali3110"
               target="_blank"
