@@ -39,6 +39,7 @@ function App() {
   const [activeSection, setActiveSection] = useState("home");
   const [darkMode, setDarkMode] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
+  const [showCopiedText, setShowCopiedText] = useState(false);
 
   // Trackball rotation state
   const [isDragging, setIsDragging] = useState(false);
@@ -171,10 +172,20 @@ function App() {
 
   const copyEmailToClipboard = async () => {
     const email = "joshuali3110@ucla.edu";
+    const isMobile = window.innerWidth < 768; // Mobile breakpoint
+
     try {
       await navigator.clipboard.writeText(email);
       setEmailCopied(true);
-      setTimeout(() => setEmailCopied(false), 2000);
+      if (isMobile) {
+        setShowCopiedText(true);
+        setTimeout(() => {
+          setEmailCopied(false);
+          setShowCopiedText(false);
+        }, 2000);
+      } else {
+        setTimeout(() => setEmailCopied(false), 2000);
+      }
     } catch (err) {
       // Fallback for older browsers
       const textArea = document.createElement("textarea");
@@ -184,7 +195,15 @@ function App() {
       document.execCommand("copy");
       document.body.removeChild(textArea);
       setEmailCopied(true);
-      setTimeout(() => setEmailCopied(false), 2000);
+      if (isMobile) {
+        setShowCopiedText(true);
+        setTimeout(() => {
+          setEmailCopied(false);
+          setShowCopiedText(false);
+        }, 2000);
+      } else {
+        setTimeout(() => setEmailCopied(false), 2000);
+      }
     }
   };
 
@@ -598,6 +617,12 @@ function App() {
                   }`}
                 />
               </div>
+              {/* Mobile "Copied!" text */}
+              {showCopiedText && (
+                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-3 py-1 rounded-md text-sm font-medium whitespace-nowrap animate-fade-in">
+                  Copied!
+                </div>
+              )}
             </button>
             <a
               href="https://github.com/joshuali3110"
