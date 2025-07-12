@@ -170,22 +170,17 @@ function App() {
     setIsMenuOpen(false);
   };
 
+  // Update copyEmailToClipboard to always show 'Copied!' text for 2 seconds
   const copyEmailToClipboard = async () => {
     const email = "joshuali3110@ucla.edu";
-    const isMobile = window.innerWidth < 768; // Mobile breakpoint
-
     try {
       await navigator.clipboard.writeText(email);
       setEmailCopied(true);
-      if (isMobile) {
-        setShowCopiedText(true);
-        setTimeout(() => {
-          setEmailCopied(false);
-          setShowCopiedText(false);
-        }, 2000);
-      } else {
-        setTimeout(() => setEmailCopied(false), 2000);
-      }
+      setShowCopiedText(true);
+      setTimeout(() => {
+        setEmailCopied(false);
+        setShowCopiedText(false);
+      }, 2000);
     } catch (err) {
       // Fallback for older browsers
       const textArea = document.createElement("textarea");
@@ -195,15 +190,11 @@ function App() {
       document.execCommand("copy");
       document.body.removeChild(textArea);
       setEmailCopied(true);
-      if (isMobile) {
-        setShowCopiedText(true);
-        setTimeout(() => {
-          setEmailCopied(false);
-          setShowCopiedText(false);
-        }, 2000);
-      } else {
-        setTimeout(() => setEmailCopied(false), 2000);
-      }
+      setShowCopiedText(true);
+      setTimeout(() => {
+        setEmailCopied(false);
+        setShowCopiedText(false);
+      }, 2000);
     }
   };
 
@@ -590,24 +581,19 @@ function App() {
           <div className="flex space-x-8 justify-center mt-12 lg:mt-16">
             <button
               onClick={copyEmailToClipboard}
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors relative group"
+              disabled={emailCopied}
+              className={`transition-colors relative group ${
+                emailCopied
+                  ? "text-blue-600 dark:text-green-400 cursor-not-allowed"
+                  : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
+              }`}
               title="joshuali3110 [at] ucla [dot] edu"
             >
               <div className="relative">
                 <Mail
                   size={32}
                   className={`transition-opacity duration-300 ${
-                    emailCopied
-                      ? "opacity-0"
-                      : "opacity-100 group-hover:opacity-0"
-                  }`}
-                />
-                <Copy
-                  size={32}
-                  className={`absolute inset-0 transition-opacity duration-300 ${
-                    emailCopied
-                      ? "opacity-0"
-                      : "opacity-0 group-hover:opacity-100"
+                    emailCopied ? "opacity-0" : "opacity-100"
                   }`}
                 />
                 <Check
@@ -617,7 +603,7 @@ function App() {
                   }`}
                 />
               </div>
-              {/* Mobile "Copied!" text */}
+              {/* Show 'Copied!' text on click for both mobile and desktop */}
               {showCopiedText && (
                 <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-3 py-1 rounded-md text-sm font-medium whitespace-nowrap animate-fade-in">
                   Copied!
