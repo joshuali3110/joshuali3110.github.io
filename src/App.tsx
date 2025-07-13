@@ -12,7 +12,6 @@ import {
   Flashlight,
   FlashlightOff,
   Check,
-  Copy,
 } from "lucide-react";
 import { quat, mat4, vec3 } from "gl-matrix";
 import PythonLogo from "./assets/python.svg";
@@ -627,7 +626,7 @@ function App() {
               <Linkedin size={32} />
             </a>
             <a
-              href="/Joshua_Li_resume.pdf"
+              href="/resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
