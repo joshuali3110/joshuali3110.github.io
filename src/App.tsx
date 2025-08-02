@@ -32,6 +32,7 @@ import PyTorch from "./assets/pytorch.svg";
 import R from "./assets/r.svg";
 import ScikitLearn from "./assets/scikitlearn.svg";
 import TypeScript from "./assets/typescript.svg";
+import Supabase from "./assets/supabase.svg";
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -216,6 +217,7 @@ function App() {
     { name: "Scikit-learn", icon: ScikitLearn, level: 60 },
     { name: "Linux", icon: LinuxLogo, level: 80 },
     { name: "R", icon: R, level: 75 },
+    { name: "Supabase", icon: Supabase, level: 60 },
   ];
 
   const projects = [
