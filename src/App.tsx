@@ -480,6 +480,17 @@ function App() {
                   CS @ UCLA
                 </p>
                 <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-4">
+                  Incoming SWE Intern @{" "}
+                    <a
+                      href="https://www.mongodb.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                    >
+                      MongoDB
+                    </a>
+                </p>
+                <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-4">
                   Bay Area & Los Angeles
                 </p>
               </div>
@@ -548,12 +559,13 @@ function App() {
                       What I'm Up To
                     </h3>
                     <p className="text-gray-600 dark:text-gray-300">
-                      I'm currently exploring various fields and technologies in
-                      software development and AI/ML to broaden my horizons and
-                      figure out the right direction for my career. As of right
-                      now, I'm most interested in machine learning and
-                      distributed systems. I'm also interning at a stealth AI
-                      startup.
+                      I'm currently finishing up my senior year of a B.S. in 
+                      Computer Science at UCLA and exploring various fields 
+                      and technologies in software development and AI/ML to 
+                      broaden my horizons and figure out the right direction 
+                      for my career. As of right now, I'm most interested in 
+                      machine learning and distributed systems. I'm also an 
+                      incoming SWE Intern at MongoDB for Summer 2026.
                     </p>
                   </div>
                 </div>
