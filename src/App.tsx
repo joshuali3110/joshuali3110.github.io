@@ -261,6 +261,20 @@ function App() {
       liveUrl:
         "https://drive.google.com/file/d/1BSxMrwpGKUn_VdXIERGbzOOupFtLvEA1/view?usp=sharing",
     },
+    {
+      title: "One Dimensional Maps",
+      description:
+        "An analytical and computational survey of Chapter 10 of Steven Strogatz's Nonlinear Dynamics and Chaos on One-Dimensional Maps. Final project for Math 134 @ UCLA",
+      technologies: [
+        "Python",
+        "NumPy",
+        "Matplotlib",
+        "LaTeX",
+      ],
+      githubUrl: "https://github.com/joshuali3110/one-dimensional-maps",
+      liveUrl:
+        "/one_dimensional_maps.pdf",
+    },
   ];
 
   // Trackball drag handlers
