@@ -494,7 +494,7 @@ function App() {
                   CS @ UCLA
                 </p>
                 <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-4">
-                  Incoming SWE Intern @{" "}
+                  SWE Intern @{" "}
                     <a
                       href="https://www.mongodb.com/"
                       target="_blank"
@@ -573,13 +573,13 @@ function App() {
                       What I'm Up To
                     </h3>
                     <p className="text-gray-600 dark:text-gray-300">
-                      I'm currently finishing up my senior year of a B.S. in 
-                      Computer Science at UCLA and exploring various fields 
-                      and technologies in software development and AI/ML to 
-                      broaden my horizons and figure out the right direction 
-                      for my career. As of right now, I'm most interested in 
-                      machine learning and distributed systems. I'm also an 
-                      incoming SWE Intern at MongoDB for Summer 2026.
+                      I recently graduated from UCLA where I studied Computer
+                      Science and I'm returning there for a Master's
+                      this fall. I'm currently a SWE Intern at MongoDB 
+                      on the Cluster-to-Cluster team where I'm looking to expand 
+                      my knowledge and experience in distributed systems. 
+                      I'm also interested in AI/ML, and I'm hoping to explore 
+                      both fields more deeply during my Master's program.
                     </p>
                   </div>
                 </div>
