@@ -7,6 +7,8 @@ import {
   FileUser,
   GraduationCap,
   CodeXml,
+  Briefcase,
+  MapPin,
   Menu,
   X,
   Flashlight,
@@ -40,6 +42,7 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
   const [showCopiedText, setShowCopiedText] = useState(false);
+  const [openExperience, setOpenExperience] = useState<number | null>(null);
 
   // Trackball rotation state
   const [isDragging, setIsDragging] = useState(false);
@@ -61,7 +64,7 @@ function App() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ["home", "skills", "projects"];
+      const sections = ["home", "skills", "projects", "timeline"];
       const scrollPosition = window.scrollY + 100;
 
       for (const section of sections) {
@@ -277,6 +280,84 @@ function App() {
     },
   ];
 
+  // Timeline experiences. To add an entry, just append an object below.
+  // `start`/`end` use "MMM YYYY" (e.g. "Jun 2025"); use "Present" for an
+  // ongoing `end`. Entries are auto-sorted by start date (most recent first),
+  // so order here does not matter. `icon` is any lucide-react icon component.
+  const experiences = [
+    {
+      organization: "MongoDB",
+      position: "Software Engineer Intern",
+      location: "San Francisco, CA",
+      start: "Jun 2026",
+      end: "Present",
+      description:
+        "Cluster-to-Cluster Team",
+      icon: Briefcase,
+    },
+    {
+      organization: "UCLA",
+      position: "M.S. in Computer Science",
+      location: "Los Angeles, CA",
+      start: "Sep 2026",
+      end: "Jun 2027",
+      description:
+        "Returning to UCLA for a Master's in Computer Science.",
+      icon: GraduationCap,
+    },
+    {
+      organization: "UCLA",
+      position: "B.S. in Computer Science",
+      location: "Los Angeles, CA",
+      start: "Sep 2022",
+      end: "Jun 2026",
+      description:
+        "Studied Computer Science at UCLA, with coursework spanning distributed systems, AI/ML, operating systems, networking, computer architecture, and more.",
+      icon: GraduationCap,
+    },
+    {
+      organization: "Palo Alto High School",
+      position: "High School Diploma",
+      location: "Palo Alto, CA",
+      start: "Aug 2018",
+      end: "Jun 2022",
+      description: "#SkoVikes",
+      icon: GraduationCap,
+    },
+    {
+      organization: "Stealth AI Startup",
+      position: "Software Engineer Intern",
+      location: "San Francisco, CA",
+      start: "Jun 2025",
+      end: "Dec 2025",
+      description: "Built a fullstack prototype of the company's product platform using Typescript, Node.js, PostgreSQL, MongDB, and more.",
+      icon: Briefcase,
+    },
+    {
+      organization: "Anytime AI",
+      position: "Software Engineer Intern",
+      location: "Remote",
+      start: "Jun 2024",
+      end: "Sep 2024",
+      description: "Improved a data pipeline for downstream training of Anytime's AI legal assistant.",
+      icon: Briefcase,
+    },
+  ];
+
+  // Sort experiences by start date, most recent first (does not mutate source).
+  const monthIndex: Record<string, number> = {
+    jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+    jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+  };
+  const startValue = (label: string) => {
+    if (/present|current/i.test(label)) return Number.MAX_SAFE_INTEGER;
+    const [mon, year] = label.trim().toLowerCase().split(/\s+/);
+    return new Date(parseInt(year, 10), monthIndex[mon] ?? 0).getTime();
+  };
+  const sortedExperiences = [...experiences].sort(
+    (a, b) => startValue(b.start) - startValue(a.start)
+  );
+
   // Trackball drag handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     setIsDragging(true);
@@ -402,7 +483,7 @@ function App() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex space-x-8 items-center">
-              {["home", "skills", "projects"].map((section) => (
+              {["home", "skills", "projects", "timeline"].map((section) => (
                 <button
                   key={section}
                   onClick={() => scrollToSection(section)}
@@ -454,7 +535,7 @@ function App() {
           {/* Mobile Navigation */}
           {isMenuOpen && (
             <div className="md:hidden py-4 border-t border-gray-100 dark:border-gray-800">
-              {["home", "skills", "projects"].map((section) => (
+              {["home", "skills", "projects", "timeline"].map((section) => (
                 <button
                   key={section}
                   onClick={() => scrollToSection(section)}
@@ -775,7 +856,7 @@ function App() {
       {/* Projects Section */}
       <section
         id="projects"
-        className="py-20 bg-white dark:bg-gray-900 min-h-screen"
+        className="py-20 bg-white dark:bg-gray-900"
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -893,9 +974,121 @@ function App() {
                       </span>
                     ))}
                   </div>
+                  <span className="inline-block text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+                    Read more...
+                  </span>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Timeline Section */}
+      <section id="timeline" className="py-20 bg-white dark:bg-gray-900">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Timeline
+            </h2>
+            <div className="w-20 h-1 bg-blue-600 dark:bg-blue-400 mx-auto"></div>
+          </div>
+
+          <div className="relative">
+            {/* Center vertical line */}
+            <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-blue-200 dark:bg-blue-900 md:-translate-x-1/2"></div>
+
+            <div className="space-y-12">
+              {sortedExperiences.map((exp, index) => {
+                const Icon = exp.icon;
+                const isLeft = index % 2 === 0;
+                const isOpen = openExperience === index;
+                const dateLabel = `${exp.start} – ${exp.end}`;
+                return (
+                  <div key={index} className="relative flex md:items-center">
+                    {/* Icon node on the line */}
+                    <div className="absolute left-4 md:left-1/2 top-6 md:top-1/2 -translate-x-1/2 md:-translate-y-1/2 z-10">
+                      <div className="w-10 h-10 rounded-full bg-blue-600 dark:bg-blue-500 ring-4 ring-white dark:ring-gray-900 flex items-center justify-center shadow-md">
+                        <Icon size={18} className="text-white" />
+                      </div>
+                    </div>
+
+                    {/* Card */}
+                    <div
+                      className={`w-full pl-14 md:w-1/2 ${
+                        isLeft ? "md:pl-0 md:pr-12" : "md:order-2 md:pl-12"
+                      }`}
+                    >
+                      <div
+                        onClick={() =>
+                          setOpenExperience(isOpen ? null : index)
+                        }
+                        className={`relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer p-6 md:max-w-sm ${
+                          isLeft ? "md:text-right md:ml-auto" : "md:mr-auto"
+                        }`}
+                      >
+                        {/* Pointer toward the line */}
+                        <div
+                          className={`hidden md:block absolute top-6 w-3 h-3 rotate-45 bg-white dark:bg-gray-900 ${
+                            isLeft
+                              ? "-right-1.5 border-t border-r"
+                              : "-left-1.5 border-b border-l"
+                          } border-gray-200 dark:border-gray-700`}
+                        ></div>
+                        <div className="md:hidden absolute top-6 -left-1.5 w-3 h-3 rotate-45 bg-white dark:bg-gray-900 border-b border-l border-gray-200 dark:border-gray-700"></div>
+
+                        {/* Date (mobile, shown inside the card) */}
+                        <span className="md:hidden inline-block px-3 py-1 mb-3 bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 text-sm rounded-full">
+                          {dateLabel}
+                        </span>
+
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                          {exp.organization}
+                        </h3>
+                        {exp.position && (
+                          <p className="text-base font-medium text-blue-600 dark:text-blue-400">
+                            {exp.position}
+                          </p>
+                        )}
+                        {exp.location && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                            <span className="inline-flex items-center gap-1">
+                              <MapPin size={14} />
+                              {exp.location}
+                            </span>
+                          </p>
+                        )}
+                        <p
+                          className={`text-gray-600 dark:text-gray-300 ${
+                            isOpen ? "" : "line-clamp-2"
+                          }`}
+                        >
+                          {exp.description}
+                        </p>
+                        {exp.description.length > 110 && (
+                          <span className="inline-block mt-4 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+                            {isOpen ? "Show less" : "Read more..."}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Date (desktop, on the opposite side) */}
+                    <div
+                      className={`hidden md:flex md:w-1/2 md:items-center ${
+                        isLeft
+                          ? "md:order-2 md:justify-start md:pl-12"
+                          : "md:justify-end md:pr-12"
+                      }`}
+                    >
+                      <span className="px-4 py-1.5 bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 text-sm font-medium rounded-full">
+                        {dateLabel}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
