@@ -175,7 +175,7 @@ function App() {
 
   // Update copyEmailToClipboard to always show 'Copied!' text for 2 seconds
   const copyEmailToClipboard = async () => {
-    const email = "joshuali3110@ucla.edu";
+    const email = "joshly.swe@gmail.com";
     try {
       await navigator.clipboard.writeText(email);
       setEmailCopied(true);
@@ -290,9 +290,9 @@ function App() {
       position: "Software Engineer Intern",
       location: "San Francisco, CA",
       start: "Jun 2026",
-      end: "Present",
+      end: "Aug 2026",
       description:
-        "Cluster-to-Cluster Team",
+        "Cluster-to-Cluster",
       icon: Briefcase,
     },
     {
@@ -575,7 +575,7 @@ function App() {
                   CS @ UCLA
                 </p>
                 <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-4">
-                  SWE Intern @{" "}
+                  Prev SWE Intern @{" "}
                     <a
                       href="https://www.mongodb.com/"
                       target="_blank"
@@ -616,10 +616,10 @@ function App() {
                     <div className="space-y-1">
                       <div className="flex justify-between items-start">
                         <span className="text-gray-600 dark:text-gray-300">
-                          Palo Alto High School
+                          UCLA: M.S. in Computer Science
                         </span>
                         <span className="text-gray-600 dark:text-gray-300 text-right w-32">
-                          2018-2022
+                          2026-2027
                         </span>
                       </div>
                       <div className="flex justify-between items-start">
@@ -632,10 +632,10 @@ function App() {
                       </div>
                       <div className="flex justify-between items-start">
                         <span className="text-gray-600 dark:text-gray-300">
-                          UCLA: M.S. in Computer Science
+                          Palo Alto High School
                         </span>
                         <span className="text-gray-600 dark:text-gray-300 text-right w-32">
-                          2026-2027
+                          2018-2022
                         </span>
                       </div>
                     </div>
@@ -654,17 +654,19 @@ function App() {
                       What I'm Up To
                     </h3>
                     <p className="text-gray-600 dark:text-gray-300">
-                      I recently graduated from UCLA where I studied Computer
-                      Science and I'm returning there for a Master's
-                      this fall. I'm currently a SWE Intern at MongoDB 
-                      on the Cluster-to-Cluster team where I'm looking to expand 
-                      my knowledge and experience in distributed systems. 
-                      I'm also interested in AI/ML, and I'm hoping to explore 
-                      both fields more deeply during my Master's program.
+                      I'm a recent Computer Science graduate from UCLA who
+                      just finished up a summer SWE internship at MongoDB
+                      on the Cluster-to-Cluster team working on scaling
+                      large distributed systems. Now, I'm returning to 
+                      UCLA in the coming year for a Master's, where I'm 
+                      looking to continue to expand my knowledge and 
+                      experience in distributed systems as well as AI/ML.
+                      <br/> <br/>
+                      I'm actively seeking 2027 new grad opportunities,
+                      so please reach out with relevant roles or connections!
                     </p>
                   </div>
                 </div>
-
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
                     <BookHeart
@@ -678,7 +680,7 @@ function App() {
                     </h3>
                     <p className="text-gray-600 dark:text-gray-300">
                       Outside of school/work, I enjoy making music, traveling,
-                      watching movies, and playing basketball.
+                      watching movies, and playing sports.
                     </p>
                   </div>
                 </div>
@@ -695,7 +697,7 @@ function App() {
                   ? "text-blue-600 dark:text-blue-400 cursor-not-allowed"
                   : "text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer"
               }`}
-              title="joshuali3110 [at] ucla [dot] edu"
+              title="joshly.swe [at] gmail [dot] com"
             >
               <div className="relative">
                 <Mail
@@ -727,7 +729,7 @@ function App() {
               <Github size={32} />
             </a>
             <a
-              href="https://www.linkedin.com/in/joshua-m-li/"
+              href="https://www.linkedin.com/in/joshly/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
