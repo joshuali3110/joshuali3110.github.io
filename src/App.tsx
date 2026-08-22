@@ -288,7 +288,7 @@ function App() {
     {
       organization: "MongoDB",
       position: "Software Engineer Intern",
-      location: "San Francisco, CA",
+      location: "Palo Alto, CA",
       start: "Jun 2026",
       end: "Aug 2026",
       description:
@@ -327,7 +327,7 @@ function App() {
     {
       organization: "Stealth AI Startup",
       position: "Software Engineer Intern",
-      location: "San Francisco, CA",
+      location: "Remote",
       start: "Jun 2025",
       end: "Dec 2025",
       description: "Built a fullstack prototype of the company's product platform using Typescript, Node.js, PostgreSQL, MongDB, and more.",
