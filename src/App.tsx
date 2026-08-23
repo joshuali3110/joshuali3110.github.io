@@ -43,6 +43,12 @@ function App() {
   const [emailCopied, setEmailCopied] = useState(false);
   const [showCopiedText, setShowCopiedText] = useState(false);
   const [openExperience, setOpenExperience] = useState<number | null>(null);
+  const [truncatedExperiences, setTruncatedExperiences] = useState<
+    Record<number, boolean>
+  >({});
+  const experienceDescRefs = useRef<Record<number, HTMLParagraphElement | null>>(
+    {}
+  );
 
   // Trackball rotation state
   const [isDragging, setIsDragging] = useState(false);
@@ -357,6 +363,31 @@ function App() {
   const sortedExperiences = [...experiences].sort(
     (a, b) => startValue(b.start) - startValue(a.start)
   );
+
+  // Detect which experience descriptions are actually clamped (overflowing
+  // their 2-line box) so "Read more..." only appears when truncation really
+  // happens — this varies by viewport width/font size, not description length.
+  useEffect(() => {
+    const measure = () => {
+      setTruncatedExperiences((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        Object.entries(experienceDescRefs.current).forEach(([key, el]) => {
+          const idx = Number(key);
+          if (!el || openExperience === idx) return; // not clamped while open
+          const isTruncated = el.scrollHeight > el.clientHeight + 1;
+          if (next[idx] !== isTruncated) {
+            next[idx] = isTruncated;
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [sortedExperiences.length, openExperience]);
 
   // Trackball drag handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -1061,13 +1092,16 @@ function App() {
                           </p>
                         )}
                         <p
+                          ref={(el) => {
+                            experienceDescRefs.current[index] = el;
+                          }}
                           className={`text-gray-600 dark:text-gray-300 ${
                             isOpen ? "" : "line-clamp-2"
                           }`}
                         >
                           {exp.description}
                         </p>
-                        {exp.description.length > 110 && (
+                        {truncatedExperiences[index] && (
                           <span className="inline-block mt-4 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
                             {isOpen ? "Show less" : "Read more..."}
                           </span>
