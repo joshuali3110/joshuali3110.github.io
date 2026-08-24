@@ -35,6 +35,10 @@ import R from "./assets/r.svg";
 import ScikitLearn from "./assets/scikitlearn.svg";
 import TypeScript from "./assets/typescript.svg";
 import Supabase from "./assets/supabase.svg";
+import AWS from "./assets/aws.svg";
+import ClaudeCode from "./assets/claudecode.svg";
+import Graphite from "./assets/graphite.svg";
+import Azure from "./assets/azure.svg";
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -209,17 +213,17 @@ function App() {
 
   const technologies = [
     { name: "Python", icon: PythonLogo, level: 95 },
-    { name: "C", icon: CLogo, level: 80 },
+    { name: "C", icon: CLogo, level: 75 },
     { name: "C++", icon: CppLogo, level: 85 },
     { name: "JavaScript", icon: JavaScript, level: 60 },
     { name: "TypeScript", icon: TypeScript, level: 60 },
-    { name: "Go", icon: GoLogo, level: 85 },
-    { name: "Git", icon: GitLogo, level: 90 },
-    { name: "React", icon: ReactLogo, level: 65 },
+    { name: "Go", icon: GoLogo, level: 90 },
+    { name: "Git", icon: GitLogo, level: 95 },
+    { name: "React", icon: ReactLogo, level: 60 },
     { name: "Next.js", icon: Next, level: 60 },
     { name: "Node.js", icon: Node, level: 60 },
     { name: "Bash", icon: BashLogo, level: 85 },
-    { name: "MongoDB", icon: MongoDB, level: 60 },
+    { name: "MongoDB", icon: MongoDB, level: 85 },
     { name: "PostgreSQL", icon: PostgreSQL, level: 60 },
     { name: "NumPy", icon: NumpyLogo, level: 80 },
     { name: "PyTorch", icon: PyTorch, level: 75 },
@@ -227,6 +231,10 @@ function App() {
     { name: "Linux", icon: LinuxLogo, level: 80 },
     { name: "R", icon: R, level: 75 },
     { name: "Supabase", icon: Supabase, level: 60 },
+    { name: "Graphite", icon: Graphite, level: 85},
+    { name: "Claude Code", icon: ClaudeCode, level: 85},
+    { name: "AWS", icon: AWS, level: 60},
+    { name: "Azure", icon: Azure, level: 60},
   ];
 
   const projects = [
