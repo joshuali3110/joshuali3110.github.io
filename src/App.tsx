@@ -39,6 +39,8 @@ import AWS from "./assets/aws.svg";
 import ClaudeCode from "./assets/claudecode.svg";
 import Graphite from "./assets/graphite.svg";
 import Azure from "./assets/azure.svg";
+import Grafana from "./assets/grafana.svg";
+import Prometheus from "./assets/prometheus.svg";
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -231,10 +233,12 @@ function App() {
     { name: "Linux", icon: LinuxLogo, level: 80 },
     { name: "R", icon: R, level: 75 },
     { name: "Supabase", icon: Supabase, level: 60 },
-    { name: "Graphite", icon: Graphite, level: 85},
-    { name: "Claude Code", icon: ClaudeCode, level: 85},
-    { name: "AWS", icon: AWS, level: 60},
-    { name: "Azure", icon: Azure, level: 60},
+    { name: "Graphite", icon: Graphite, level: 85 },
+    { name: "Claude Code", icon: ClaudeCode, level: 85 },
+    { name: "AWS", icon: AWS, level: 60 },
+    { name: "Azure", icon: Azure, level: 60 },
+    { name: "Grafana", icon: Grafana, level: 70 },
+    { name: "Prometheus", icon: Prometheus, level: 60 }
   ];
 
   const projects = [
@@ -306,7 +310,7 @@ function App() {
       start: "Jun 2026",
       end: "Aug 2026",
       description:
-        "Cluster-to-Cluster",
+        "Worked on the Cluster-to-Cluster team scaling large distributed systems. Boosted maximum sustained throughput ~3.5x and reduced object store + network costs 75-95%.",
       icon: Briefcase,
     },
     {
