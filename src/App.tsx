@@ -255,7 +255,7 @@ function App() {
         "Redis",
       ],
       githubUrl:
-        "https://github.com/joshuali3110/windborne_application/tree/deploy",
+        "https://github.com/joshuali3110/windborne_application",
       liveUrl: "https://windborne-balloon-mapping.vercel.app/",
     },
     {
